@@ -3,27 +3,18 @@ package frc.robot;
 // import org.usfirst.frc.team2078.robot.*;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Timer;
-
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-
-import edu.wpi.cscore.CvSink;
-import edu.wpi.cscore.CvSource;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.cscore.UsbCamera;
-import java.util.concurrent.TimeUnit;;
+
 
 
 
@@ -45,32 +36,20 @@ public class Robot extends IterativeRobot {
 	Talon frontLeft = new Talon(3);
 	Talon rearRight = new Talon(1);
 	Talon rearLeft = new Talon(0);
-	Talon frontStrafeMotor = new Talon(4);
-	Victor rearStrafeMotor = new Victor(5);
-	Victor leftLiftMotor = new Victor(6);
-	Jaguar rightLiftMotor = new Jaguar(7);
-	Jaguar leftRollerMotor = new Jaguar(8);
-	Victor rightRollerMotor = new Victor(9);
+	Talon flyWHeel = new Talon(4);
+	Talon index = new Talon(5);
+
+	SpeedControllerGroup left = new SpeedControllerGroup(frontLeft, rearLeft);
+	SpeedControllerGroup right = new SpeedControllerGroup(frontRight, rearRight);
+	DifferentialDrive drive = new DifferentialDrive(left, right);
 
 	Compressor mainCompressor = new Compressor(0);
 	DoubleSolenoid Piston = new DoubleSolenoid(0, 1);
-	
-	private static final int pistonTrigger = 1;
-	private static final int liftButton=3;
-	private static final int lowerButton=2;
-	private static final int compressorOff=10;
-	private static final int compressorOn=11;
-	private static final int rollerOut=6;
-	private static final int rollerIn=7;
-	private static final int switchForward=4;
-	private static final int switchBackward=5;
-	private static final int strafeRight=9;
-	private static final int strafeLeft=8;
 
 	
 	RobotDrive arcadeDrive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 	
-	Joystick JS1 = new Joystick(0);
+	Joystick xbox = new Joystick(0);
 	
 	double x;
 	double y;
@@ -131,58 +110,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		x = JS1.getX();
-		y = JS1.getY();
-		arcadeDrive.arcadeDrive(x, y);
-		
-		if(JS1.getRawButton(liftButton)) {
-			leftLiftMotor.set(-0.35);
-			rightLiftMotor.set(0.15);
-		} else if(JS1.getRawButton(lowerButton)) {
-			leftLiftMotor.set(0.15);
-			rightLiftMotor.set(0.075);
-		} else {
-			leftLiftMotor.set(-0.05);
-			rightLiftMotor.set(0.025);
-			}
 
-		
-		//mainCompressor.setClosedLoopControl(false);
-		if(JS1.getRawButton(pistonTrigger)) {
-			Piston.set(Value.kForward);
-			Timer.delay(0.5);
-			Piston.set(Value.kReverse);
-		} else {
-			Piston.set(DoubleSolenoid.Value.kOff);
-		}
-		
-		if(JS1.getRawButton(compressorOn)) {
-			mainCompressor.setClosedLoopControl(true);
-		} else if (JS1.getRawButton(compressorOff)){
-			mainCompressor.setClosedLoopControl(false);
-		}	
-
-		if(JS1.getRawButton(rollerOut)){
-			leftRollerMotor.set(-1);
-			rightRollerMotor.set(1);
-		} else if(JS1.getRawButton(rollerIn)){
-			leftRollerMotor.set(1);
-			rightRollerMotor.set(-1);
-		} else {
-			leftRollerMotor.set(0);
-			rightRollerMotor.set(0);
-		}
-		
-		if(JS1.getRawButton(strafeLeft)){
-			frontStrafeMotor.set(-0.25);
-			rearStrafeMotor.set(0.25);
-		} else if(JS1.getRawButton(strafeRight)){
-			frontStrafeMotor.set(0.25);
-			rearStrafeMotor.set(-0.25);
-		} else {
-			frontStrafeMotor.set(0);
-			rearStrafeMotor.set(0);
-		}
 	}
  public void teleopInit(){
 	 arcadeDrive.setInvertedMotor(MotorType.kFrontRight, true);
@@ -195,6 +123,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		/*
 		x = JS1.getX();
 		y = JS1.getY();
 		arcadeDrive.arcadeDrive(x, y);
@@ -260,6 +189,58 @@ public class Robot extends IterativeRobot {
 			arcadeDrive.setInvertedMotor(MotorType.kRearRight, false);
 			arcadeDrive.setInvertedMotor(MotorType.kRearLeft, true);
 		}
+		*/
+
+
+
+
+		drive.tankDrive(fixController(-xbox.getRawAxis(1))*0.8, fixController(xbox.getRawAxis(5))*0.8);
+
+		if (xbox.getRawButton(1)) {     //A  turn on flywheel
+			flyWHeel.set(0.65);
+		}
+
+		if (xbox.getRawButton(2)) {      //B  turn off flywheel
+			flyWHeel.set(0);
+		}
+
+		if (xbox.getRawButton(3))  		//X  turn on index
+		{
+			index.set(.5);
+		}
+
+		if (xbox.getRawButton(4))		//Y turn off index
+		{
+			index.set(0);
+		}
+
+		double power = flyWHeel.get();
+
+		if (xbox.getRawButton(5)) {     //left bumper increase speed
+			if (power < .66)				//max speed 
+			{
+				flyWHeel.set(power + .02);
+			}
+		}
+
+		if (xbox.getRawButton(6)) {     //right bumper decrease speed
+			flyWHeel.set(power - .02);
+		}
+
+
+	}
+
+
+	public double fixController(double val) {
+
+		System.out.println(val);
+
+		if (val >= 0.5 || val <= 0.5) {
+			return val;
+		} else {
+			return 0.0;
+		}
+		
 	}
 
 
