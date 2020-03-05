@@ -34,6 +34,7 @@ public class Robot extends IterativeRobot {
 	Talon rearLeft = new Talon(0);
 	Talon flyWHeel = new Talon(4);
 	Talon index = new Talon(5);
+	Talon intake = new Talon(6);
 
 	SpeedControllerGroup left = new SpeedControllerGroup(frontLeft, rearLeft);
 	SpeedControllerGroup right = new SpeedControllerGroup(frontRight, rearRight);
@@ -89,35 +90,53 @@ public class Robot extends IterativeRobot {
 		
 		drive.tankDrive(-(xbox.getRawAxis(1)), -(xbox.getRawAxis(5)));
 
+		// Flywheel on
 		if (xbox.getRawButton(1)) {     //A  turn on flywheel
 			flyWHeel.set(0.65);
 		}
 
+		// Flywheel off
 		if (xbox.getRawButton(2)) {      //B  turn off flywheel
 			flyWHeel.set(0);
 		}
 
+		// Index on
 		if (xbox.getRawButton(3))  		//X  turn on index
 		{
 			index.set(.5);
 		}
 
+		// Index off
 		if (xbox.getRawButton(4))		//Y turn off index
 		{
 			index.set(0);
 		}
 
+		// Intake on
+		if (xbox.getRawAxis(3) >= 0.5) {		//RT turn on intake
+			intake.set(.5);
+		}
+
+		// Intake off
+		if (xbox.getRawButton(6)) {     //RB turn off intake
+			intake.set(0);
+		}
+
+		System.out.println(intake.get());
+
 		double power = flyWHeel.get();
 
-		if (xbox.getRawButton(5)) {     //left bumper increase speed
+		if (xbox.getRawAxis(6) >= 0.5) {     //left bumper increase speed
 			if (power < .66)				//max speed 
 			{
 				flyWHeel.set(power + .02);
 			}
 		}
 
-		if (xbox.getRawButton(6)) {     //right bumper decrease speed
+		if (xbox.getRawAxis(6) >= 0.5) {    //right bumper decrease speed
+			if (power > 0) {			    //min speed 
 			flyWHeel.set(power - .02);
+			}
 		}
 
 
